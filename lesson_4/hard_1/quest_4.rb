@@ -28,7 +28,7 @@ class NonWheeledVehicle
   end
 
   def range
-    super + 10
+    super + 10 #overides range method in Moveables module
   end
 end
 
