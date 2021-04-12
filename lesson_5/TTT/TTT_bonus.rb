@@ -88,10 +88,16 @@ class Square
 end
 
 class Player
+  attr_accessor :score
   attr_reader :marker
 
   def initialize(marker)
     @marker = marker
+    @score = 0
+  end
+
+  def add_score
+    @score += 1
   end
 end
 
@@ -116,6 +122,7 @@ class TTTGame
   def play
     clear
     display_welcome_message
+    clear
     main_game
     display_goodbye_message
   end
@@ -135,10 +142,17 @@ class TTTGame
       display_board
       player_move
       display_result
-      break unless play_again?
+      break if score_is_5
       reset
       display_play_again_message
     end
+  end
+
+  def score_is_5
+    if human.score == 5 || computer.score == 5
+      return true
+    end
+    false
   end
 
   def current_player_moves
@@ -157,7 +171,9 @@ class TTTGame
 
   def display_welcome_message
     puts "Welcome to Tic Tac Toe!"
-    puts ""
+    puts "First one to a score of 5 wins"
+    puts "Press enter to start"
+    answer = gets.chomp
   end
 
   def display_goodbye_message
@@ -171,20 +187,30 @@ class TTTGame
 
   def display_board
     puts "You're a #{human.marker}. Computer is #{computer.marker}"
-    puts ""
+    puts "Your score: #{human.score}. Computer score: #{computer.score}"
     board.draw
     puts ""
   end
 
+  def joinor(arr, delimiter=', ', word = 'or')
+    case arr.size
+    when 0 then ''
+    when 1 then arr.first
+    when 2 then arr.join(" #{word} ")
+    else
+      arr[-1] = "#{word} #{arr.last}"
+      arr.join(delimiter)
+    end
+  end
+
   def human_moves
-    puts "Choose a square between (#{board.unmarked_keys.join(', ')}): "
+    puts "Choose a square between (#{joinor(board.unmarked_keys)}): "
     square = nil
     loop do
       square = gets.chomp.to_i
       break if board.unmarked_keys.include?(square)
       puts "Sorry, not a valid choice!"
     end
-
     board[square] = human.marker
   end
 
@@ -197,9 +223,9 @@ class TTTGame
 
     case board.winning_marker
     when human.marker
-      puts "You won!"
+      human.add_score
     when computer.marker
-      puts "Computer won!"
+      computer.add_score
     else
       puts "It's a tie!"
     end
